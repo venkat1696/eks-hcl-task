@@ -42,14 +42,26 @@ jobs:
       # Step 5: Build the Docker image
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.ECR_REPOSITORY_URI }}:latest ./patient-service/Dockerfile
+          docker build -t ${{ secrets.ECR_REPOSITORY_URI }}:1.0.0.${{ github.run_number }} ./patient-service/Dockerfile
 
       # Step 6: Push the Docker image to ECR
       - name: Push Docker image to ECR
         run: |
-          docker push ${{ secrets.ECR_REPOSITORY_URI }}:latest
+          docker push ${{ secrets.ECR_REPOSITORY_URI }}:1.0.0.${{ github.run_number }}
 
       # Step 7: Optional: Clean up Docker images (this is usually a good practice to avoid excessive disk space usage)
       - name: Clean up Docker images
         run: |
           docker system prune -af
+      - name: chage build version in helm
+        run: |
+          cd $HOME
+          sudo rm -R -f eks-hcl-task-helm          
+          git clone https://${{ secrets.CICD_GIT_AUTH }}@github.com/venkat1696/eks-hcl-task-helm.git
+          cd eks-hcl-task-helm
+          find . -type f -exec sed -i '0,/${{ env.docker_repo }}:1.0.0.[0-9]*/ s+${{ env.docker_repo }}:1.0.0.[0-9]*+${{ env.docker_repo }}:1.0.0.${{ github.run_number }}+g' values-dev.yaml \;
+          cd ../
+          git status
+          git add *
+          git commit -m "changing docker tag version in ${{ env.docker_repo }}"
+          git push origin main
