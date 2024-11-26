@@ -33,8 +33,7 @@ jobs:
       - name: Set up AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::${{ env.aws_accountid }}:role/<role-name>  # Replace with your IAM role ARN
-          role-session-name: GitHubActions
+          role-to-assume: arn:aws:iam::${{ env.aws_accountid }}:role/github-group1-hu2
           aws-region: ${{ env.location }}
 
       # Step 4: Log in to Amazon ECR
